@@ -1,5 +1,5 @@
 component,coicop,base_amount_eur,assumption
 rent,CP041,450,"Single room in a shared flat in Turin, utilities included"
-food,CP01,250,"Groceries for cooking at home, occasional university canteen meal"
-transport,CP0732,30,"Monthly urban bus and tram pass"
-other,TOTAL,150,"Phone, personal care, clothing, study material and leisure, tracked with all-items inflation"
+food,CP01,275,"Groceries for cooking at home, occasional university canteen meal (midpoint of a 250-300 EUR range)"
+transport,CP0732,0,"Local public transport is free for students under 26 with the Piemove regional pass; raise this for older students"
+other,TOTAL,100,"Phone, personal care, clothing, study material and leisure, tracked with all-items inflation"

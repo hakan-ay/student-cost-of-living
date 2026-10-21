@@ -15,10 +15,10 @@ Snapshot from the pipeline run of 2026-10-22 (consumer prices up to September 20
 
 | | Sep 2025 | Sep 2026 | Change |
 |---|---:|---:|---:|
-| Monthly budget in EUR | 885 | 912 | +3.0 % |
+| Monthly budget in EUR | 830 | 854 | +2.9 % |
 | Average EUR/TRY | 48.5 | 56.0 | +15.5 % |
-| Monthly budget in TRY | 42,919 | 51,077 | +19.0 % |
-| Budget in TRY at 2025 Turkish prices | 40,570 | 37,217 | −8.3 % |
+| Monthly budget in TRY | 40,237 | 47,834 | +18.9 % |
+| Budget in TRY at 2025 Turkish prices | 38,035 | 34,854 | −8.4 % |
 
 In nominal lira the budget rose by about a fifth in a year. Turkish prices rose faster than the euro did
 (HICP +29.7 % against EUR/TRY +15.5 %), so for a household whose income keeps up with Turkish inflation the same
@@ -46,14 +46,16 @@ prices**. Each component is moved over time with the Italian HICP index of its c
 
 | Component | Base (EUR / month, 2025) | Weight | Indexed with |
 |---|---:|---:|---|
-| Rent (single room, shared flat, utilities included) | 450 | 51.1 % | HICP `CP041` actual rentals for housing |
-| Food (groceries, occasional canteen meal) | 250 | 28.4 % | HICP `CP01` food and non-alcoholic beverages |
-| Transport (monthly urban bus and tram pass) | 30 | 3.4 % | HICP `CP0732` passenger transport by road |
-| Other (phone, personal care, clothing, study material, leisure) | 150 | 17.0 % | HICP all items |
-| **Total** | **880** | **100 %** | |
+| Rent (single room, shared flat, utilities included) | 450 | 54.5 % | HICP `CP041` actual rentals for housing |
+| Food (groceries, occasional canteen meal; midpoint of 250-300) | 275 | 33.3 % | HICP `CP01` food and non-alcoholic beverages |
+| Transport (free for students under 26 with the Piemove regional pass) | 0 | 0.0 % | HICP `CP0732` passenger transport by road |
+| Other (phone, personal care, clothing, study material, leisure) | 100 | 12.1 % | HICP all items |
+| **Total** | **825** | **100 %** | |
 
 The base amounts are the author's assumptions from student consulting work, not an official statistic. They live
 in [`dbt/seeds/basket_components.csv`](dbt/seeds/basket_components.csv) and can be changed without touching SQL.
+Transport is kept as a zero-amount component so that a student aged 26 or over only needs a new base amount
+(for example a monthly pass) instead of a model change.
 
 ## Data model
 

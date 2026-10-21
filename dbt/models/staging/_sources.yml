@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Parquet snapshots written by the fetch scripts in src/ (one file per source, all columns as text).
+    meta:
+      external_location: "../data/raw/{name}.parquet"
+    loaded_at_field: "cast(fetched_at as timestamptz)"
+    freshness:
+      warn_after: {count: 8, period: day}
+      error_after: {count: 15, period: day}
+    tables:
+      - name: ecb_exr_try_eur
+        description: ECB euro foreign exchange reference rate, Turkish lira per euro, daily (EXR.D.TRY.EUR.SP00.A).
+      - name: eurostat_hicp
+        description: >
+          Eurostat HICP, ECOICOP ver. 2 (dataset prc_hicp_minr), monthly, Italy and Turkey.
+          Units I25 (index 2025=100) and RCH_A (annual rate of change, %).
+      - name: istat_nic
+        description: >
+          Istat NIC (Italian national consumer price index), dataflow 167_745, monthly from 2026, base 2025=100.
+          Measures 4 (index), 6 (% change on previous month), 7 (% change on same month of previous year).

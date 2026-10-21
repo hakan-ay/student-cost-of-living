@@ -1,0 +1,25 @@
+name: student_cost_of_living
+version: "0.1.0"
+config-version: 2
+profile: student_cost_of_living
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: [target, logs]
+
+# Everything is materialized as a table: the raw layer is read with relative Parquet paths, and a view would keep
+# that relative path inside the warehouse file and break when the database is opened from another folder.
+models:
+  student_cost_of_living:
+    +materialized: table
+    staging:
+      +schema: staging
+    marts:
+      +schema: marts
+
+seeds:
+  student_cost_of_living:
+    +schema: reference

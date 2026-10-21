@@ -1,0 +1,5 @@
+component,coicop,base_amount_eur,assumption
+rent,CP041,450,"Single room in a shared flat in Turin, utilities included"
+food,CP01,250,"Groceries for cooking at home, occasional university canteen meal"
+transport,CP0732,30,"Monthly urban bus and tram pass"
+other,TOTAL,150,"Phone, personal care, clothing, study material and leisure, tracked with all-items inflation"

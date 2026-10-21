@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: stg_ecb__exr_try_eur
+    description: Daily EUR/TRY reference rate (Turkish lira per euro).
+    columns:
+      - name: rate_date
+        data_tests: [not_null, unique]
+      - name: eur_try
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 1, max_value: 500}}
+
+  - name: stg_eurostat__hicp
+    description: Monthly HICP index (2025=100) and annual rate of change for Italy and Turkey.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments: {combination_of_columns: [month, geo, coicop]}
+    columns:
+      - name: month
+        data_tests: [not_null]
+      - name: geo
+        data_tests:
+          - accepted_values:
+              arguments: {values: [IT, TR]}
+      - name: index_2025
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 0, max_value: 10000}}
+      - name: annual_rate_pct
+        data_tests:
+          - accepted_range: {arguments: {min_value: -50, max_value: 200}}
+
+  - name: stg_istat__nic
+    description: Monthly Istat NIC detail for Italy, base 2025=100.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments: {combination_of_columns: [month, coicop]}
+    columns:
+      - name: index_2025
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 50, max_value: 200}}

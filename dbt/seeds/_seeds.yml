@@ -1,0 +1,27 @@
+version: 2
+
+seeds:
+  - name: basket_components
+    description: >
+      Reference monthly budget of a Turkish student living in Turin, at 2025 average prices (EUR). These amounts
+      are the author's assumptions from student consulting work, not an official statistic. The weight of each
+      component is its share of the total and is computed in the models.
+    columns:
+      - name: component
+        data_tests: [not_null, unique]
+      - name: coicop
+        description: HICP category (ECOICOP ver. 2) that moves this component over time.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('coicop_labels'), field: coicop}
+      - name: base_amount_eur
+        description: Monthly amount in EUR at 2025 average prices.
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 0, max_value: 2000}}
+  - name: coicop_labels
+    description: English labels for the ECOICOP ver. 2 categories used in this project.
+    columns:
+      - name: coicop
+        data_tests: [not_null, unique]

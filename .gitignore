@@ -1,0 +1,22 @@
+# Local warehouse (rebuilt by dbt from data/raw)
+data/*.duckdb
+data/*.duckdb.wal
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml
+logs/
+
+# Python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.env
+
+# macOS
+.DS_Store
+
+# Local tool settings (contain absolute paths)
+.claude/

@@ -1,0 +1,123 @@
+version: 2
+
+models:
+  - name: fx_daily
+    description: Daily ECB EUR/TRY reference rate with 1-day, 30-day and 365-day changes.
+    columns:
+      - name: rate_date
+        description: ECB business day.
+        data_tests: [not_null, unique]
+      - name: eur_try
+        description: Turkish lira per euro.
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 1, max_value: 500}}
+      - name: eur_per_1000_try
+        description: Euros bought with 1,000 lira at the reference rate.
+      - name: change_1d_pct
+        description: Change against the previous ECB business day, in %.
+        data_tests:
+          - accepted_range: {arguments: {min_value: -30, max_value: 30}}
+      - name: change_30d_pct
+        description: Change against the latest rate on or before the date 30 days earlier, in %.
+      - name: change_365d_pct
+        description: Change against the latest rate on or before the date 365 days earlier, in %.
+        data_tests:
+          - accepted_range: {arguments: {min_value: -60, max_value: 300}}
+      - name: is_latest
+        description: True for the most recent published rate.
+
+  - name: cpi_monthly
+    description: >
+      Monthly consumer prices, long format. Eurostat HICP for Italy and Turkey (from 2005) and Istat NIC detail
+      for Italy (from 2026). All indices are on base 2025=100.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments: {combination_of_columns: [source, geo, coicop, month]}
+    columns:
+      - name: source
+        data_tests:
+          - accepted_values:
+              arguments: {values: [eurostat_hicp, istat_nic]}
+      - name: coicop
+        description: ECOICOP ver. 2 category in Eurostat style (TOTAL, CP01, CP041, ...).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('coicop_labels'), field: coicop}
+      - name: month
+        description: First day of the reference month.
+        data_tests: [not_null]
+      - name: index_2025
+        description: Price index, 2025 average = 100.
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 0, max_value: 10000}}
+      - name: monthly_rate_pct
+        description: Change on the previous month, in %. Derived from the index for Eurostat, published by Istat.
+        data_tests:
+          - accepted_range: {arguments: {min_value: -30, max_value: 30}}
+      - name: annual_rate_pct
+        description: Change on the same month of the previous year, in % (as published).
+        data_tests:
+          - accepted_range: {arguments: {min_value: -50, max_value: 200}}
+
+  - name: student_budget_monthly
+    description: >
+      Monthly cost of the reference student basket (seed basket_components) in Italy. Each component's 2025 base
+      amount is moved with its Italian HICP index; the EUR total is converted with the month's average EUR/TRY.
+    columns:
+      - name: month
+        data_tests: [not_null, unique]
+      - name: rent_eur
+        description: Rent component, moved with HICP CP041 (actual rentals for housing).
+      - name: food_eur
+        description: Food component, moved with HICP CP01 (food and non-alcoholic beverages).
+      - name: transport_eur
+        description: Transport component, moved with HICP CP0732 (passenger transport by road).
+      - name: other_eur
+        description: Everything else, moved with all-items HICP.
+      - name: total_eur
+        description: Monthly budget in EUR.
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 300, max_value: 3000}}
+      - name: eur_try_avg
+        description: Average ECB EUR/TRY over the month's business days.
+        data_tests: [not_null]
+      - name: fx_days
+        description: Number of ECB business days behind eur_try_avg.
+        data_tests:
+          - accepted_range: {arguments: {min_value: 15, max_value: 23}}
+      - name: total_try
+        description: Monthly budget in TRY (total_eur x eur_try_avg).
+        data_tests: [not_null]
+      - name: total_eur_yoy_pct
+        description: Change of the EUR budget on the same month of the previous year, in %.
+      - name: eur_try_yoy_pct
+        description: Change of the average EUR/TRY rate on the same month of the previous year, in %.
+      - name: total_try_yoy_pct
+        description: Change of the TRY budget on the same month of the previous year, in % (prices and exchange rate).
+
+  - name: try_purchasing_power
+    description: How the Italian student budget looks to a household that earns and saves in Turkish lira.
+    columns:
+      - name: month
+        data_tests: [not_null, unique]
+      - name: tr_inflation_yoy_pct
+        description: Turkish HICP, annual rate of change, in %.
+      - name: it_inflation_yoy_pct
+        description: Italian HICP, annual rate of change, in %.
+      - name: real_eur_try_index_2025
+        description: >
+          EUR/TRY corrected for the inflation gap (x IT HICP / TR HICP), 2025 = 100. Above 100 means Italy became
+          more expensive for lira earners than in 2025.
+        data_tests:
+          - not_null
+          - accepted_range: {arguments: {min_value: 10, max_value: 1000}}
+      - name: budget_try
+        description: Monthly budget in TRY (same as student_budget_monthly.total_try).
+      - name: budget_try_at_2025_prices
+        description: Monthly budget in TRY deflated by Turkish HICP, i.e. expressed in 2025 lira.
+      - name: budget_real_try_yoy_pct
+        description: Change of the real TRY budget on the same month of the previous year, in %.

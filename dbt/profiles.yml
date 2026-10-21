@@ -1,0 +1,8 @@
+# Local DuckDB file, no credentials. Paths are relative to this folder (run dbt from dbt/).
+student_cost_of_living:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/warehouse.duckdb
+      threads: 4

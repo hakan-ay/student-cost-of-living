@@ -7,12 +7,12 @@
 
 An automated data pipeline on official open data: Python fetchers pull exchange rates and consumer prices from
 the ECB, Eurostat and Istat into Parquet snapshots, and a **dbt** project on **DuckDB** turns them into tested
-marts. A GitHub Actions job refreshes everything every week, commits the new data and publishes a short
-[weekly brief](reports/latest_brief.md) written with the Claude API, which is only published if every number in
-it can be traced to the data. A dashboard comes next (see [Roadmap](#roadmap)).
+marts. A GitHub Actions job refreshes everything every week and commits the new data, and a short
+[weekly update](WEEKLY_UPDATES.md) written by Claude is published only if every number in it can be traced to
+the data. A dashboard comes next (see [Roadmap](#roadmap)).
 
-> **Status:** milestones W1-W4 (sources, raw layer, dbt models and tests, weekly automation, LLM brief). The data
-> pipeline needs no API keys; only the weekly brief uses an Anthropic API key.
+> **Status:** milestones W1-W4 (sources, raw layer, dbt models and tests, weekly automation, LLM brief).
+> No API keys are needed.
 
 ## Latest numbers
 
@@ -158,8 +158,8 @@ network access. The DuckDB warehouse is rebuilt by dbt and is not committed; the
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | every push and pull request | guardrail unit tests, `dbt build` on the committed raw data, then checks that the README numbers match the marts |
-| [`refresh.yml`](.github/workflows/refresh.yml) | Mondays 06:00 UTC, or manually | fetch all sources → `dbt build` → `dbt source freshness` → export marts → regenerate the README block → write the weekly brief → commit `data/`, `reports/` and `README.md` to `main` |
+| [`ci.yml`](.github/workflows/ci.yml) | every push and pull request | unit tests, `dbt build` on the committed raw data, then checks that the README numbers match the marts and that `WEEKLY_UPDATES.md` matches the published briefs |
+| [`refresh.yml`](.github/workflows/refresh.yml) | Mondays 06:00 UTC, or manually | fetch all sources → `dbt build` → `dbt source freshness` → export marts → regenerate the README block → commit `data/` and `README.md` to `main` |
 
 The refresh job is built to fail loudly but degrade gracefully: if one source cannot be reached, the other
 sources are still refreshed and committed, and the job is marked as failed at the end. A failing data test stops
@@ -168,41 +168,39 @@ are also written to the run's summary page.
 
 ## Weekly brief
 
-Every week the refresh job asks Claude (`claude-opus-5-5`) for a short plain-English brief for Turkish students
-and their families: the budget in euros and lira, this week's exchange rate, and what it means in real terms.
-Latest: [`reports/latest_brief.md`](reports/latest_brief.md); archive: [`reports/briefs/`](reports/briefs/).
+Every Monday, after the data refresh, a short plain-English brief for Turkish students and their families is
+added to [**WEEKLY_UPDATES.md**](WEEKLY_UPDATES.md): the budget in euros and lira, this week's exchange rate, and
+what it means in real terms. Past weeks stay on the same page, newest first.
+
+The brief is written by a scheduled Claude Code routine (no API key needed) and can also be written by hand. The
+writing happens outside the pipeline; the pipeline owns what goes in and what is allowed out:
 
 ```mermaid
 flowchart LR
-    M[(data/marts)] --> F["brief_facts.py<br/>fact sheet (JSON)"]
-    F --> C["Claude API<br/>structured output:<br/>headline, paragraphs,<br/>cited numbers"]
-    C --> G{"guardrail.py<br/>every number<br/>in the facts?"}
-    G -- yes --> P["reports/briefs/&lt;date&gt;.md<br/>+ &lt;date&gt;.facts.json"]
-    G -- "no (once)" --> R["violations sent back<br/>for a correction"] --> C
-    G -- "no (again)" --> X["not published,<br/>job marked failed"]
+    M[(data/marts)] --> F["brief.py facts<br/>&lt;date&gt;.facts.json"]
+    F --> W["Claude Code routine<br/>writes &lt;date&gt;.draft.json<br/>(docs/weekly_brief.md)"]
+    W --> G{"brief.py publish<br/>guardrail.py:<br/>every number<br/>in the facts?"}
+    G -- yes --> P["&lt;date&gt;.brief.json<br/>+ WEEKLY_UPDATES.md"]
+    G -- no --> R["REJECTED, nothing published;<br/>fix the draft and retry"] --> G
 ```
 
 **Guardrail: every number in the brief must exist in the input tables.**
-- The model only sees a fact sheet built from the marts ([`src/brief_facts.py`](src/brief_facts.py)): about 35
-  facts with an id, value, unit and description. The exact fact sheet is saved next to each brief.
-- The answer is structured output (JSON schema): a headline, 2-3 paragraphs and `cited_numbers`, where each
-  number written is listed with the id of the fact it comes from (the id is constrained to the fact sheet's ids).
-- [`src/guardrail.py`](src/guardrail.py) then checks the final text, not the model's claims: every number in the
-  text must match a fact up to the rounding implied by the decimals written (`854` for 853.95, `18.9` for 18.88),
-  must be listed in `cited_numbers`, and every citation must match the fact it names. Derived numbers that are
-  not in the fact sheet (a difference, a sum) are rejected.
-- On failure the violations are sent back once for a correction. A brief that still fails is not written and
-  the job is marked as failed, so a wrong number never reaches `main`.
-- The guardrail is covered by unit tests ([`tests/test_guardrail.py`](tests/test_guardrail.py)) that run in CI.
+- The writer only uses a fact sheet built from the marts ([`src/brief_facts.py`](src/brief_facts.py)): 36 facts
+  with an id, value, unit and description. `brief.py facts` freezes it as `reports/briefs/<date>.facts.json`,
+  and the brief is checked against exactly that file.
+- The draft is structured JSON: a headline, 2-3 paragraphs and `cited_numbers`, where every number written is
+  listed with the id of the fact it comes from ([format and writing rules](docs/weekly_brief.md)).
+- [`src/guardrail.py`](src/guardrail.py) checks the final text, not the writer's claims: every number in the
+  text must match a fact up to the rounding implied by the decimals written (`854` for 853.95, `18.9` for
+  18.88), must be listed in `cited_numbers`, and every citation must match the fact it names. Derived numbers
+  that are not in the fact sheet (a difference, a sum) are rejected.
+- A rejected draft is never published. CI checks that `WEEKLY_UPDATES.md` is exactly what the published briefs
+  produce, so the page cannot be edited by hand without a matching checked brief.
+- Covered by unit tests ([`tests/test_guardrail.py`](tests/test_guardrail.py),
+  [`tests/test_brief.py`](tests/test_brief.py)).
 
 The check covers numbers, not wording: a sentence with a correct number and the wrong direction ("rose" instead
-of "fell") would pass. The prompt also tells the model to describe the data only, without financial advice or
-exchange-rate forecasts.
-
-**Setup and cost.** Add an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions).
-Without it the brief step is skipped and the rest of the pipeline runs as before. One brief is a few thousand
-tokens, roughly USD 0.05 per week at Claude Opus 5.5 prices. Locally: `uv run python src/write_brief.py`
-(or `--dry-run` to print the prompt and the fact sheet without calling the API).
+of "fell") would pass. The writing guide also rules out financial advice and exchange-rate forecasts.
 
 ## Project layout
 
@@ -216,12 +214,14 @@ src/
   export_marts.py       marts to data/marts/*.parquet
   update_readme.py      "Latest numbers" block of this README, generated from the marts
   brief_facts.py        fact sheet for the weekly brief, built from data/marts
-  write_brief.py        weekly brief with the Claude API (structured output, one correction round)
+  brief.py              weekly brief: freeze the fact sheet, check and publish a draft, rebuild WEEKLY_UPDATES.md
   guardrail.py          checks that every number in the brief comes from the fact sheet
 data/raw/               Parquet snapshots (one file per source)
 data/marts/             exported marts, refreshed weekly
-reports/                weekly briefs and the fact sheets they were written from
-tests/                  unit tests for the guardrail
+reports/briefs/         published briefs (<date>.brief.json) and the fact sheets they were checked against
+docs/weekly_brief.md    writing guide and procedure for the weekly brief
+WEEKLY_UPDATES.md       all weekly briefs, newest first
+tests/                  unit tests for the guardrail and publishing
 .github/workflows/      CI and weekly refresh
 dbt/
   models/staging/       one model per source, typed and pivoted
@@ -236,8 +236,8 @@ dbt/
   marts, 59 data tests.
 - [x] **W3: scheduled pipeline.** Weekly GitHub Actions refresh that commits tested data back to `main`, CI on
   every push, README numbers generated from the marts (see [Automation](#automation)).
-- [x] **W4: LLM weekly brief.** Claude API brief with structured output and a numeric guardrail (see
-  [Weekly brief](#weekly-brief)).
+- [x] **W4: LLM weekly brief.** Weekly brief written by a Claude Code routine and published through a numeric
+  guardrail (see [Weekly brief](#weekly-brief)).
 - [ ] **W5: dashboard.** TODO: Streamlit app on the marts: budget in EUR and TRY over time, component breakdown,
   real EUR/TRY index, and an editable basket.
 

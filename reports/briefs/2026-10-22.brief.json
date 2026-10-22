@@ -1,0 +1,106 @@
+{
+ "headline": "A month in Italy: 854 euros, or 47,834 lira",
+ "paragraphs": [
+  "In September 2026 the reference student budget in Turin came to 854 euros a month, 2.9 % more than a year earlier. At that month's average rate of 56.01 lira per euro it cost 47,834 lira, up 18.9 % from 40,237 lira in September 2025. Rent is the largest item at 468 euros, while local transport is free for students under 26.",
+  "The euro moved little against the lira this week. The latest ECB rate, on 21 October 2026, was 55.72 lira: 0.8 % above a week earlier and 0.6 % below its level 30 days ago. Over 365 days the euro has gained 14.4 %.",
+  "For a family whose income keeps pace with Turkish prices, the picture is better than the nominal figures suggest. Turkish consumer prices rose 29.7 % over a year, faster than the euro, so measured in 2025 lira the budget fell from 38,035 to 34,854, a drop of 8.4 %. The real EUR/TRY index stands at 95.6, below its 2025 level of 100."
+ ],
+ "cited_numbers": [
+  {
+   "fact_id": "budget_eur",
+   "as_written": "854"
+  },
+  {
+   "fact_id": "budget_try",
+   "as_written": "47,834"
+  },
+  {
+   "fact_id": "budget_eur",
+   "as_written": "854"
+  },
+  {
+   "fact_id": "budget_eur_yoy_pct",
+   "as_written": "2.9"
+  },
+  {
+   "fact_id": "eur_try_month_avg",
+   "as_written": "56.01"
+  },
+  {
+   "fact_id": "budget_try",
+   "as_written": "47,834"
+  },
+  {
+   "fact_id": "budget_try_yoy_pct",
+   "as_written": "18.9"
+  },
+  {
+   "fact_id": "budget_try_prev_year",
+   "as_written": "40,237"
+  },
+  {
+   "fact_id": "rent_eur",
+   "as_written": "468"
+  },
+  {
+   "fact_id": "free_transport_age_limit",
+   "as_written": "26"
+  },
+  {
+   "fact_id": "eur_try_latest",
+   "as_written": "55.72"
+  },
+  {
+   "fact_id": "eur_try_change_7d_pct",
+   "as_written": "0.8"
+  },
+  {
+   "fact_id": "eur_try_change_30d_pct",
+   "as_written": "0.6"
+  },
+  {
+   "fact_id": "days_in_30d_window",
+   "as_written": "30"
+  },
+  {
+   "fact_id": "days_in_365d_window",
+   "as_written": "365"
+  },
+  {
+   "fact_id": "eur_try_change_365d_pct",
+   "as_written": "14.4"
+  },
+  {
+   "fact_id": "tr_inflation_yoy_pct",
+   "as_written": "29.7"
+  },
+  {
+   "fact_id": "price_base_year",
+   "as_written": "2025"
+  },
+  {
+   "fact_id": "budget_try_at_2025_prices_prev_year",
+   "as_written": "38,035"
+  },
+  {
+   "fact_id": "budget_try_at_2025_prices",
+   "as_written": "34,854"
+  },
+  {
+   "fact_id": "budget_real_try_yoy_pct",
+   "as_written": "8.4"
+  },
+  {
+   "fact_id": "real_eur_try_index",
+   "as_written": "95.6"
+  },
+  {
+   "fact_id": "price_base_year",
+   "as_written": "2025"
+  },
+  {
+   "fact_id": "index_base_value",
+   "as_written": "100"
+  }
+ ]
+}

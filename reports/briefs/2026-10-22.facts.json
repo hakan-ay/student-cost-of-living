@@ -1,0 +1,218 @@
+[
+ {
+  "id": "budget_month",
+  "value": "September 2026",
+  "unit": "month",
+  "description": "Latest month with published consumer prices"
+ },
+ {
+  "id": "budget_month_prev_year",
+  "value": "September 2025",
+  "unit": "month",
+  "description": "Same month one year earlier"
+ },
+ {
+  "id": "fx_latest_date",
+  "value": "21 October 2026",
+  "unit": "date",
+  "description": "Date of the latest ECB EUR/TRY rate"
+ },
+ {
+  "id": "price_base_year",
+  "value": 2025,
+  "unit": "year",
+  "description": "Base year of all price indices and of the basket amounts"
+ },
+ {
+  "id": "index_base_value",
+  "value": 100,
+  "unit": "index",
+  "description": "Value of every price index in its base year"
+ },
+ {
+  "id": "budget_eur",
+  "value": 853.95,
+  "unit": "EUR",
+  "description": "Monthly student budget in Italy, September 2026"
+ },
+ {
+  "id": "budget_eur_prev_year",
+  "value": 829.78,
+  "unit": "EUR",
+  "description": "Monthly student budget in Italy, September 2025"
+ },
+ {
+  "id": "budget_eur_yoy_pct",
+  "value": 2.91,
+  "unit": "%",
+  "description": "Change of the EUR budget over a year"
+ },
+ {
+  "id": "rent_eur",
+  "value": 468.0,
+  "unit": "EUR",
+  "description": "Rent component of the budget, September 2026"
+ },
+ {
+  "id": "food_eur",
+  "value": 281.05,
+  "unit": "EUR",
+  "description": "Food component of the budget, September 2026"
+ },
+ {
+  "id": "transport_eur",
+  "value": 0.0,
+  "unit": "EUR",
+  "description": "Transport component (free local transport for students under 26 in Piedmont)"
+ },
+ {
+  "id": "free_transport_age_limit",
+  "value": 26,
+  "unit": "years",
+  "description": "Students below this age travel free on local transport in Piedmont"
+ },
+ {
+  "id": "other_eur",
+  "value": 104.9,
+  "unit": "EUR",
+  "description": "Other spending component of the budget, September 2026"
+ },
+ {
+  "id": "it_rent_inflation_yoy_pct",
+  "value": 3.4,
+  "unit": "%",
+  "description": "Italian rents, annual change (HICP CP041)"
+ },
+ {
+  "id": "it_food_inflation_yoy_pct",
+  "value": 1.7,
+  "unit": "%",
+  "description": "Italian food prices, annual change (HICP CP01)"
+ },
+ {
+  "id": "it_inflation_yoy_pct",
+  "value": 4.2,
+  "unit": "%",
+  "description": "Italian consumer prices, annual change (HICP)"
+ },
+ {
+  "id": "tr_inflation_yoy_pct",
+  "value": 29.7,
+  "unit": "%",
+  "description": "Turkish consumer prices, annual change (HICP)"
+ },
+ {
+  "id": "eur_try_month_avg",
+  "value": 56.01,
+  "unit": "TRY per EUR",
+  "description": "Average ECB EUR/TRY rate in September 2026"
+ },
+ {
+  "id": "eur_try_month_avg_prev_year",
+  "value": 48.49,
+  "unit": "TRY per EUR",
+  "description": "Average ECB EUR/TRY rate in September 2025"
+ },
+ {
+  "id": "eur_try_month_avg_yoy_pct",
+  "value": 15.52,
+  "unit": "%",
+  "description": "Change of the monthly average EUR/TRY over a year"
+ },
+ {
+  "id": "budget_try",
+  "value": 47834.0,
+  "unit": "TRY",
+  "description": "Monthly student budget converted to lira, September 2026"
+ },
+ {
+  "id": "budget_try_prev_year",
+  "value": 40237.0,
+  "unit": "TRY",
+  "description": "Monthly student budget converted to lira, September 2025"
+ },
+ {
+  "id": "budget_try_yoy_pct",
+  "value": 18.88,
+  "unit": "%",
+  "description": "Change of the lira budget over a year"
+ },
+ {
+  "id": "budget_try_at_2025_prices",
+  "value": 34854.0,
+  "unit": "TRY (2025 prices)",
+  "description": "Lira budget deflated by Turkish HICP, September 2026"
+ },
+ {
+  "id": "budget_try_at_2025_prices_prev_year",
+  "value": 38035.0,
+  "unit": "TRY (2025 prices)",
+  "description": "Lira budget deflated by Turkish HICP, September 2025"
+ },
+ {
+  "id": "budget_real_try_yoy_pct",
+  "value": -8.36,
+  "unit": "%",
+  "description": "Change of the inflation-adjusted lira budget over a year (negative = cheaper in real terms)"
+ },
+ {
+  "id": "real_eur_try_index",
+  "value": 95.64,
+  "unit": "index (2025 = 100)",
+  "description": "EUR/TRY corrected for the Italy-Turkey inflation gap; above 100 = Italy dearer for lira earners than in 2025"
+ },
+ {
+  "id": "eur_try_latest",
+  "value": 55.72,
+  "unit": "TRY per EUR",
+  "description": "Latest ECB EUR/TRY reference rate"
+ },
+ {
+  "id": "eur_try_week_ago",
+  "value": 55.29,
+  "unit": "TRY per EUR",
+  "description": "ECB EUR/TRY rate about one week before the latest"
+ },
+ {
+  "id": "eur_try_change_7d_pct",
+  "value": 0.78,
+  "unit": "%",
+  "description": "Change of EUR/TRY over the last week"
+ },
+ {
+  "id": "eur_try_change_30d_pct",
+  "value": -0.62,
+  "unit": "%",
+  "description": "Change of EUR/TRY over the last 30 days"
+ },
+ {
+  "id": "eur_try_change_365d_pct",
+  "value": 14.39,
+  "unit": "%",
+  "description": "Change of EUR/TRY over the last 365 days"
+ },
+ {
+  "id": "days_in_30d_window",
+  "value": 30,
+  "unit": "days",
+  "description": "Length of the 30-day exchange-rate window"
+ },
+ {
+  "id": "days_in_365d_window",
+  "value": 365,
+  "unit": "days",
+  "description": "Length of the 365-day exchange-rate window"
+ },
+ {
+  "id": "eur_per_1000_try",
+  "value": 17.95,
+  "unit": "EUR",
+  "description": "Euros bought with 1,000 lira at the latest rate"
+ },
+ {
+  "id": "try_amount_1000",
+  "value": 1000,
+  "unit": "TRY",
+  "description": "Reference amount of lira for eur_per_1000_try"
+ }
+]

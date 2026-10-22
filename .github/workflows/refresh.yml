@@ -16,8 +16,6 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    env:
-      HAS_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.2.0
@@ -44,28 +42,11 @@ jobs:
           uv run python src/update_readme.py
           sed -n '/latest-numbers:start/,/latest-numbers:end/p' README.md | grep -v 'latest-numbers' >> "$GITHUB_STEP_SUMMARY"
 
-      # The brief is only published if every number in it matches the fact sheet (src/guardrail.py).
-      # A rejected brief does not block the data commit; the job is marked as failed at the end instead.
-      - name: Write weekly brief (Claude API)
-        id: brief
-        if: env.HAS_ANTHROPIC_KEY == 'true'
-        continue-on-error: true
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          uv run python src/write_brief.py
-          { echo; echo "## Weekly brief"; echo; cat reports/latest_brief.md; } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Skip brief (no API key)
-        if: env.HAS_ANTHROPIC_KEY != 'true'
-        run: echo "::notice::ANTHROPIC_API_KEY secret is not set; the weekly brief was skipped."
-
       - name: Commit refreshed data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add data/raw data/marts README.md
-          if [ -d reports ]; then git add reports; fi
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
@@ -79,8 +60,3 @@ jobs:
           echo "::error::At least one source failed to fetch; see the 'Fetch ECB, Eurostat and Istat' step."
           exit 1
 
-      - name: Fail if the brief was rejected
-        if: steps.brief.outcome == 'failure'
-        run: |
-          echo "::error::The weekly brief failed the numeric guardrail or the API call; see the 'Write weekly brief' step."
-          exit 1

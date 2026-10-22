@@ -13,8 +13,11 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv sync --locked
 
-      - name: Unit tests (brief guardrail)
+      - name: Unit tests (brief guardrail and publishing)
         run: uv run pytest -q
+
+      - name: Weekly updates page matches the published briefs
+        run: uv run python src/brief.py index --check
 
       - name: dbt build (seeds, models, tests)
         working-directory: dbt

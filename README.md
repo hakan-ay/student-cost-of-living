@@ -7,12 +7,15 @@
 
 **How much does a month as a Turkish student in Italy cost in EUR and in TRY, and how fast is it changing?**
 
-An automated data pipeline on official open data: Python fetchers pull exchange rates and consumer prices from
-the ECB, Eurostat and Istat into Parquet snapshots, and a **dbt** project on **DuckDB** turns them into tested
-marts. A GitHub Actions job refreshes everything every week and commits the new data, and a short
-[weekly update](WEEKLY_UPDATES.md) written by Claude is published only if every number in it can be traced to
-the data. A Streamlit [dashboard](#dashboard) shows the budget, inflation, rents, the exchange rate and the
-latest brief.
+**At a glance**
+- **Question from real work:** the author advises Turkish students applying to study in Italy; this answers what
+  their families ask most, using official data only (ECB, Eurostat, Istat), no API keys.
+- **Pipeline:** incremental Python fetchers → Parquet snapshots → **dbt** on **DuckDB** (staging → 4 marts),
+  refreshed every Monday by **GitHub Actions**, which commits the new data only if every test passes.
+- **Tests:** 59 dbt data tests (ranges, grain, business rules, cross-source checks, freshness) plus Python unit
+  tests and a dashboard smoke test in CI.
+- **Weekly brief with a guardrail:** a short [weekly update](WEEKLY_UPDATES.md) written by Claude is published
+  only if every number in it can be traced to the data; a Streamlit [dashboard](#dashboard) shows the rest.
 
 ![Dashboard](docs/dashboard.jpg)
 
@@ -219,7 +222,8 @@ briefs. It needs no database, network access or API key, so it runs anywhere the
 - **One filter row:** the period (1Y, 3Y, 5Y, 10Y, All) for every chart, and **Adjust the basket**, where a
   student can enter their own monthly amounts (for example a transport pass for students aged 26 or over); the
   tiles and the budget chart are recomputed with the same method as the dbt mart
-  ([`app/budget.py`](app/budget.py), tested to reproduce `student_budget_monthly` with the reference basket).
+  ([`app/budget.py`](app/budget.py), unit-tested on synthetic tables in [`tests/test_budget.py`](tests/test_budget.py)
+  and checked to reproduce `student_budget_monthly` with the reference basket).
 - **Budget growth, EUR vs TRY**, both indexed to 100 at the start of the period so they share one axis (no
   dual axes); the gap between the lines is the exchange-rate effect.
 - **Inflation, Italy vs Turkey** (HICP annual rates), **Italian rents vs all prices** (HICP CP041 vs all items,
@@ -262,7 +266,7 @@ data/marts/             exported marts, refreshed weekly
 reports/briefs/         published briefs (<date>.brief.json) and the fact sheets they were checked against
 docs/weekly_brief.md    writing guide and procedure for the weekly brief
 WEEKLY_UPDATES.md       all weekly briefs, newest first
-tests/                  unit tests for the guardrail and publishing, dashboard smoke test
+tests/                  unit tests for the guardrail, publishing and budget maths, dashboard smoke test
 app/dashboard.py        Streamlit dashboard on data/marts and the published briefs
 app/budget.py           budget for any basket (same method as the dbt mart)
 requirements.txt        dashboard dependencies for Streamlit Community Cloud

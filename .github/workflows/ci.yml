@@ -13,7 +13,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv sync --locked
 
-      - name: Unit tests (guardrail, publishing, dashboard smoke test)
+      - name: Unit tests (guardrail, publishing, budget maths, dashboard smoke test)
         run: uv run pytest -q
 
       - name: Weekly updates page matches the published briefs

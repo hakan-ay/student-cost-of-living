@@ -1,6 +1,6 @@
 name: CI
 
-# Builds and tests the dbt project on the committed raw data (no network calls to the sources).
+# Unit tests, then builds and tests the dbt project on the committed raw data (no network calls, no API key).
 on:
   push:
   pull_request:
@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv sync --locked
+
+      - name: Unit tests (brief guardrail)
+        run: uv run pytest -q
 
       - name: dbt build (seeds, models, tests)
         working-directory: dbt

@@ -14,6 +14,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from budget import compute_budget
+
 ROOT = Path(__file__).resolve().parents[1]
 MARTS = ROOT / "data" / "marts"
 BRIEFS = ROOT / "reports" / "briefs"
@@ -119,9 +121,8 @@ cpi = marts["cpi_monthly"]
 for df, col in ((budget, "month"), (power, "month"), (fx, "rate_date"), (cpi, "month")):
     df[col] = pd.to_datetime(df[col])
 
-cur, latest_fx = budget.iloc[-1], fx.iloc[-1]
-prev = budget[budget["month"] == cur["month"] - pd.DateOffset(years=1)].iloc[0]
-cur_power = power.iloc[-1]
+reference_basket = pd.read_csv(BASKET)
+latest_fx = fx.iloc[-1]
 week_ago = fx[fx["rate_date"] <= latest_fx["rate_date"] - pd.Timedelta(days=7)].iloc[-1]
 
 # ---------- header ----------
@@ -129,10 +130,32 @@ st.title("Student cost of living: Italy in EUR and TRY")
 st.markdown(
     f"How much does a month as a Turkish student in Italy cost in euros and in lira, and how fast is it changing? "
     f"A reference budget for a student in Turin, moved with official price indices and converted at the ECB rate.  \n"
-    f"<span style='color:{C['muted']}'>Consumer prices up to {cur['month']:%B %Y} · exchange rate up to "
+    f"<span style='color:{C['muted']}'>Consumer prices up to {budget['month'].max():%B %Y} · exchange rate up to "
     f"{latest_fx['rate_date']:%-d %B %Y} · refreshed weekly · [source code]({REPO})</span>",
     unsafe_allow_html=True,
 )
+
+# ---------- one filter row: period for the charts, basket for the tiles and the budget chart ----------
+f_period, f_basket = st.columns([3, 2], vertical_alignment="bottom")
+with f_period:
+    period = st.segmented_control("Period", list(PERIODS), default="5Y", help="Applies to every chart below.") or "5Y"
+with f_basket:
+    basket = reference_basket.copy()
+    with st.popover("Adjust the basket", width="stretch"):
+        st.caption("Monthly amounts in EUR at 2025 average prices. Each one is moved with its Italian price index.")
+        for i, row in basket.iterrows():
+            basket.loc[i, "base_amount_eur"] = st.number_input(
+                row["component"].capitalize(), min_value=0, max_value=5000, step=10,
+                value=int(row["base_amount_eur"]), help=row["assumption"], key=f"basket_{row['component']}")
+custom = not basket["base_amount_eur"].equals(reference_basket["base_amount_eur"])
+if custom:
+    st.caption(f"Custom basket: €{basket['base_amount_eur'].sum():,.0f} a month at 2025 prices "
+               f"(reference €{reference_basket['base_amount_eur'].sum():,.0f}). Tiles and the budget chart use it; "
+               "the weekly brief always uses the reference basket.")
+
+mine = compute_budget(cpi, budget, power, basket)
+cur = mine.iloc[-1]
+prev = mine[mine["month"] == cur["month"] - pd.DateOffset(years=1)].iloc[0]
 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Monthly budget, EUR", f"€{cur['total_eur']:,.0f}",
@@ -141,17 +164,15 @@ k2.metric("Monthly budget, TRY", f"₺{cur['total_try']:,.0f}",
           f"{fmt_pct(cur['total_try_yoy_pct'])} vs {prev['month']:%b %Y}", delta_color="inverse")
 k3.metric(f"EUR/TRY, {latest_fx['rate_date']:%-d %b}", f"{latest_fx['eur_try']:.2f}",
           f"{fmt_pct(100 * (latest_fx['eur_try'] / week_ago['eur_try'] - 1))} in a week", delta_color="inverse")
-k4.metric("Budget in 2025 lira", f"₺{cur_power['budget_try_at_2025_prices']:,.0f}",
-          f"{fmt_pct(cur_power['budget_real_try_yoy_pct'])} vs {prev['month']:%b %Y}", delta_color="inverse",
+k4.metric("Budget in 2025 lira", f"₺{cur['budget_try_at_2025_prices']:,.0f}",
+          f"{fmt_pct(cur['budget_real_try_yoy_pct'])} vs {prev['month']:%b %Y}", delta_color="inverse",
           help="The TRY budget deflated by Turkish consumer prices: what it costs a family whose income keeps up "
                "with Turkish inflation. Down means cheaper in real terms.")
 
-# ---------- one filter row for every chart ----------
-period = st.segmented_control("Period", list(PERIODS), default="5Y", help="Applies to every chart below.") or "5Y"
 years = PERIODS[period]
-start = cur["month"] - pd.DateOffset(years=years) if years else budget["month"].min()
+start = cur["month"] - pd.DateOffset(years=years) if years else mine["month"].min()
 
-b = budget[budget["month"] >= start].copy()
+b = mine[mine["month"] >= start].copy()
 b["EUR (start = 100)"] = 100 * b["total_eur"] / b["total_eur"].iloc[0]
 b["TRY (start = 100)"] = 100 * b["total_try"] / b["total_try"].iloc[0]
 
@@ -169,7 +190,8 @@ with left:
         line_chart(b, "month", [("EUR (start = 100)", "Budget in EUR", C["eur"]),
                                 ("TRY (start = 100)", "Budget in TRY", C["try"])], "Index, start = 100", ",.0f"),
         b[["month", "total_eur", "eur_try_avg", "total_try", "total_eur_yoy_pct", "total_try_yoy_pct"]]
-        .rename(columns={"total_eur": "budget_eur", "total_try": "budget_try"}),
+        .rename(columns={"total_eur": "budget_eur", "total_try": "budget_try"})
+        .round({"budget_eur": 2, "eur_try_avg": 4, "budget_try": 0, "total_eur_yoy_pct": 2, "total_try_yoy_pct": 2}),
     )
     st.caption("Both budgets are indexed to 100 at the start of the period so they share one axis. "
                "The gap between the lines is the effect of the exchange rate.")
@@ -227,7 +249,7 @@ else:
 # ---------- method ----------
 st.divider()
 with st.expander("Reference basket and sources"):
-    basket = pd.read_csv(BASKET)
+    basket = reference_basket.copy()
     basket["weight"] = (basket["base_amount_eur"] / basket["base_amount_eur"].sum()).map("{:.1%}".format)
     st.dataframe(basket, hide_index=True, width="stretch")
     st.markdown(

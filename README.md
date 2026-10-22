@@ -216,7 +216,10 @@ briefs. It needs no database, network access or API key, so it runs anywhere the
 
 - **Headline tiles:** monthly budget in EUR and TRY with the change over a year, the latest EUR/TRY with the
   change over a week, and the budget in 2025 lira (deflated by Turkish prices).
-- **One period filter** (1Y, 3Y, 5Y, 10Y, All) above every chart.
+- **One filter row:** the period (1Y, 3Y, 5Y, 10Y, All) for every chart, and **Adjust the basket**, where a
+  student can enter their own monthly amounts (for example a transport pass for students aged 26 or over); the
+  tiles and the budget chart are recomputed with the same method as the dbt mart
+  ([`app/budget.py`](app/budget.py), tested to reproduce `student_budget_monthly` with the reference basket).
 - **Budget growth, EUR vs TRY**, both indexed to 100 at the start of the period so they share one axis (no
   dual axes); the gap between the lines is the exchange-rate effect.
 - **Inflation, Italy vs Turkey** (HICP annual rates), **Italian rents vs all prices** (HICP CP041 vs all items,
@@ -260,6 +263,7 @@ docs/weekly_brief.md    writing guide and procedure for the weekly brief
 WEEKLY_UPDATES.md       all weekly briefs, newest first
 tests/                  unit tests for the guardrail and publishing, dashboard smoke test
 app/dashboard.py        Streamlit dashboard on data/marts and the published briefs
+app/budget.py           budget for any basket (same method as the dbt mart)
 requirements.txt        dashboard dependencies for Streamlit Community Cloud
 .github/workflows/      CI and weekly refresh
 dbt/
@@ -278,8 +282,7 @@ dbt/
 - [x] **W4: LLM weekly brief.** Weekly brief written by a Claude Code routine and published through a numeric
   guardrail (see [Weekly brief](#weekly-brief)).
 - [x] **W5: dashboard.** Streamlit app on the marts and the weekly briefs (see [Dashboard](#dashboard)).
-- [ ] **Next:** publish the live demo on Streamlit Community Cloud; an editable basket in the dashboard (for
-  example transport for students aged 26 or over); a component breakdown of the budget.
+- [ ] **Next:** publish the live demo on Streamlit Community Cloud; a component breakdown of the budget.
 
 ## Limitations
 

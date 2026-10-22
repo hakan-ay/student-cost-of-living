@@ -3,16 +3,21 @@
 [![CI](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/ci.yml/badge.svg)](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/ci.yml)
 [![Weekly refresh](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/refresh.yml/badge.svg)](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/refresh.yml)
 
+**Live demo:** coming soon on Streamlit Community Cloud (see [Dashboard](#dashboard) to run it locally or deploy it).
+
 **How much does a month as a Turkish student in Italy cost in EUR and in TRY, and how fast is it changing?**
 
 An automated data pipeline on official open data: Python fetchers pull exchange rates and consumer prices from
 the ECB, Eurostat and Istat into Parquet snapshots, and a **dbt** project on **DuckDB** turns them into tested
 marts. A GitHub Actions job refreshes everything every week and commits the new data, and a short
 [weekly update](WEEKLY_UPDATES.md) written by Claude is published only if every number in it can be traced to
-the data. A dashboard comes next (see [Roadmap](#roadmap)).
+the data. A Streamlit [dashboard](#dashboard) shows the budget, inflation, rents, the exchange rate and the
+latest brief.
 
-> **Status:** milestones W1-W4 (sources, raw layer, dbt models and tests, weekly automation, LLM brief).
-> No API keys are needed.
+![Dashboard](docs/dashboard.jpg)
+
+> **Status:** milestones W1-W5 (sources, raw layer, dbt models and tests, weekly automation, LLM brief,
+> dashboard). No API keys are needed.
 
 ## Latest numbers
 
@@ -142,6 +147,8 @@ uv run dbt docs generate && uv run dbt docs serve   # optional: lineage graph an
 cd ..
 uv run python src/export_marts.py     # marts to data/marts/*.parquet
 uv run python src/update_readme.py    # rewrite the "Latest numbers" block from the marts
+uv run streamlit run app/dashboard.py # dashboard on http://localhost:8501
+uv run pytest -q                      # guardrail, publishing and dashboard smoke tests
 ```
 
 Run dbt from the `dbt/` folder: the profile and the raw Parquet paths are relative to it.
@@ -158,7 +165,7 @@ network access. The DuckDB warehouse is rebuilt by dbt and is not committed; the
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | every push and pull request | unit tests, `dbt build` on the committed raw data, then checks that the README numbers match the marts and that `WEEKLY_UPDATES.md` matches the published briefs |
+| [`ci.yml`](.github/workflows/ci.yml) | every push and pull request | unit tests and a dashboard smoke test, `dbt build` on the committed raw data, then checks that the README numbers match the marts, that `WEEKLY_UPDATES.md` matches the published briefs and that `requirements.txt` matches `uv.lock` |
 | [`refresh.yml`](.github/workflows/refresh.yml) | Mondays 06:00 UTC, or manually | fetch all sources → `dbt build` → `dbt source freshness` → export marts → regenerate the README block → commit `data/` and `README.md` to `main` |
 
 The refresh job is built to fail loudly but degrade gracefully: if one source cannot be reached, the other
@@ -202,6 +209,36 @@ flowchart LR
 The check covers numbers, not wording: a sentence with a correct number and the wrong direction ("rose" instead
 of "fell") would pass. The writing guide also rules out financial advice and exchange-rate forecasts.
 
+## Dashboard
+
+[`app/dashboard.py`](app/dashboard.py) is a single-page Streamlit app on the exported marts and the published
+briefs. It needs no database, network access or API key, so it runs anywhere the repository is checked out.
+
+- **Headline tiles:** monthly budget in EUR and TRY with the change over a year, the latest EUR/TRY with the
+  change over a week, and the budget in 2025 lira (deflated by Turkish prices).
+- **One period filter** (1Y, 3Y, 5Y, 10Y, All) above every chart.
+- **Budget growth, EUR vs TRY**, both indexed to 100 at the start of the period so they share one axis (no
+  dual axes); the gap between the lines is the exchange-rate effect.
+- **Inflation, Italy vs Turkey** (HICP annual rates), **Italian rents vs all prices** (HICP CP041 vs all items,
+  2025 = 100) and **EUR/TRY daily**.
+- **Latest weekly brief** with links to the fact sheet and structured brief it was checked against, and a table
+  of every number in it with the fact it comes from.
+
+Design: the colour follows the entity on every chart (Italy / EUR blue, Turkey / TRY orange) from a palette
+validated for colour-vision deficiency in both light and dark mode; 2px lines, end values labelled, unified
+hover, and a data table under every chart so no value is reachable only by hovering. Checked at desktop and
+phone width.
+
+**Deploy on Streamlit Community Cloud** (free, no secrets needed):
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with the GitHub account that owns this repository.
+2. Create app → from an existing repo: repository `hakan-ay/student-cost-of-living`, branch `main`, main file
+   path `app/dashboard.py`.
+3. Advanced settings → Python version 3.12. No secrets.
+4. Deploy. Dependencies come from [`requirements.txt`](requirements.txt), which holds only the dashboard's
+   packages (regenerate with `uv export --only-group dashboard --no-hashes --no-emit-project --format
+   requirements-txt -o requirements.txt`). The app redeploys on every push, so the weekly data refresh and brief
+   appear automatically.
+
 ## Project layout
 
 ```
@@ -221,7 +258,9 @@ data/marts/             exported marts, refreshed weekly
 reports/briefs/         published briefs (<date>.brief.json) and the fact sheets they were checked against
 docs/weekly_brief.md    writing guide and procedure for the weekly brief
 WEEKLY_UPDATES.md       all weekly briefs, newest first
-tests/                  unit tests for the guardrail and publishing
+tests/                  unit tests for the guardrail and publishing, dashboard smoke test
+app/dashboard.py        Streamlit dashboard on data/marts and the published briefs
+requirements.txt        dashboard dependencies for Streamlit Community Cloud
 .github/workflows/      CI and weekly refresh
 dbt/
   models/staging/       one model per source, typed and pivoted
@@ -238,8 +277,9 @@ dbt/
   every push, README numbers generated from the marts (see [Automation](#automation)).
 - [x] **W4: LLM weekly brief.** Weekly brief written by a Claude Code routine and published through a numeric
   guardrail (see [Weekly brief](#weekly-brief)).
-- [ ] **W5: dashboard.** TODO: Streamlit app on the marts: budget in EUR and TRY over time, component breakdown,
-  real EUR/TRY index, and an editable basket.
+- [x] **W5: dashboard.** Streamlit app on the marts and the weekly briefs (see [Dashboard](#dashboard)).
+- [ ] **Next:** publish the live demo on Streamlit Community Cloud; an editable basket in the dashboard (for
+  example transport for students aged 26 or over); a component breakdown of the budget.
 
 ## Limitations
 

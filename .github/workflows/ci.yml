@@ -13,11 +13,16 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv sync --locked
 
-      - name: Unit tests (brief guardrail and publishing)
+      - name: Unit tests (guardrail, publishing, dashboard smoke test)
         run: uv run pytest -q
 
       - name: Weekly updates page matches the published briefs
         run: uv run python src/brief.py index --check
+
+      - name: requirements.txt (Streamlit Cloud) matches uv.lock
+        run: |
+          uv export --only-group dashboard --no-hashes --no-emit-project --format requirements-txt -o /tmp/requirements.txt
+          diff <(grep -v '^#' requirements.txt) <(grep -v '^#' /tmp/requirements.txt)
 
       - name: dbt build (seeds, models, tests)
         working-directory: dbt

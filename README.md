@@ -1,17 +1,21 @@
 # Student Cost of Living: Italy in EUR and TRY
 
+[![CI](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/ci.yml/badge.svg)](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/ci.yml)
+[![Weekly refresh](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/refresh.yml/badge.svg)](https://github.com/hakan-ay/student-cost-of-living/actions/workflows/refresh.yml)
+
 **How much does a month as a Turkish student in Italy cost in EUR and in TRY, and how fast is it changing?**
 
 An automated data pipeline on official open data: Python fetchers pull exchange rates and consumer prices from
 the ECB, Eurostat and Istat into Parquet snapshots, and a **dbt** project on **DuckDB** turns them into tested
-marts. Later milestones add a scheduled GitHub Actions run, an LLM-written weekly brief with numeric guardrails,
-and a dashboard (see [Roadmap](#roadmap)).
+marts. A GitHub Actions job refreshes everything every week and commits the new data. Later milestones add an
+LLM-written weekly brief with numeric guardrails and a dashboard (see [Roadmap](#roadmap)).
 
-> **Status:** milestone W1-W2 (sources, raw layer, dbt models and tests). No API keys are needed.
+> **Status:** milestones W1-W3 (sources, raw layer, dbt models and tests, weekly automation). No API keys are needed.
 
 ## Latest numbers
 
-Snapshot from the pipeline run of 2026-10-22 (consumer prices up to September 2026, exchange rate up to 21 October 2026).
+<!-- latest-numbers:start -->
+Generated from the marts: consumer prices up to September 2026, exchange rate up to 21 October 2026.
 
 | | Sep 2025 | Sep 2026 | Change |
 |---|---:|---:|---:|
@@ -20,9 +24,8 @@ Snapshot from the pipeline run of 2026-10-22 (consumer prices up to September 20
 | Monthly budget in TRY | 40,237 | 47,834 | +18.9 % |
 | Budget in TRY at 2025 Turkish prices | 38,035 | 34,854 | −8.4 % |
 
-In nominal lira the budget rose by about a fifth in a year. Turkish prices rose faster than the euro did
-(HICP +29.7 % against EUR/TRY +15.5 %), so for a household whose income keeps up with Turkish inflation the same
-month in Italy became about 8 % cheaper in real terms.
+In nominal lira the budget changed by +18.9 % in a year. Turkish prices rose faster than the euro did (Turkish HICP +29.7 % against EUR/TRY +15.5 %), so for a household whose income keeps up with Turkish inflation the same month in Italy became about 8 % cheaper in real terms.
+<!-- latest-numbers:end -->
 
 ## Sources
 
@@ -134,6 +137,9 @@ cd dbt
 uv run dbt build                      # seeds, models and tests into data/warehouse.duckdb
 uv run dbt source freshness
 uv run dbt docs generate && uv run dbt docs serve   # optional: lineage graph and column docs
+cd ..
+uv run python src/export_marts.py     # marts to data/marts/*.parquet
+uv run python src/update_readme.py    # rewrite the "Latest numbers" block from the marts
 ```
 
 Run dbt from the `dbt/` folder: the profile and the raw Parquet paths are relative to it.
@@ -143,7 +149,20 @@ upsert it on the series key: the last 7 days for the ECB rate, the last 13 month
 (statistical offices revise recent months). `--full` re-downloads everything.
 
 The raw Parquet files are public statistics and are committed, so `dbt build` works on a fresh clone without
-network access. The DuckDB warehouse is rebuilt by dbt and is not committed.
+network access. The DuckDB warehouse is rebuilt by dbt and is not committed; the marts are exported to
+`data/marts/` instead.
+
+## Automation
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| [`ci.yml`](.github/workflows/ci.yml) | every push and pull request | `dbt build` on the committed raw data, then checks that the README numbers match the marts |
+| [`refresh.yml`](.github/workflows/refresh.yml) | Mondays 06:00 UTC, or manually | fetch all sources → `dbt build` → `dbt source freshness` → export marts → regenerate the README block → commit `data/` and `README.md` to `main` |
+
+The refresh job is built to fail loudly but degrade gracefully: if one source cannot be reached, the other
+sources are still refreshed and committed, and the job is marked as failed at the end. A failing data test stops
+the job before anything is committed, so `main` only ever holds data that passed every test. The latest numbers
+are also written to the run's summary page.
 
 ## Project layout
 
@@ -154,7 +173,11 @@ src/
   fetch_eurostat.py     Eurostat HICP (prc_hicp_minr), IT and TR
   fetch_istat.py        Istat NIC detail for Italy
   fetch_all.py          runs the three fetchers
+  export_marts.py       marts to data/marts/*.parquet
+  update_readme.py      "Latest numbers" block of this README, generated from the marts
 data/raw/               Parquet snapshots (one file per source)
+data/marts/             exported marts, refreshed weekly
+.github/workflows/      CI and weekly refresh
 dbt/
   models/staging/       one model per source, typed and pivoted
   models/marts/         fx_daily, cpi_monthly, student_budget_monthly, try_purchasing_power
@@ -166,9 +189,8 @@ dbt/
 
 - [x] **W1-W2: sources and model.** Fetchers for ECB, Eurostat and Istat, Parquet raw layer, dbt staging and
   marts, 59 data tests.
-- [ ] **W3: scheduled pipeline.** TODO: GitHub Actions workflow on a weekly cron: `fetch_all.py` → `dbt build`
-  → commit the refreshed `data/raw/` files (and a small Parquet export of the marts) back to the repository;
-  fail the run on test errors, surface freshness warnings.
+- [x] **W3: scheduled pipeline.** Weekly GitHub Actions refresh that commits tested data back to `main`, CI on
+  every push, README numbers generated from the marts (see [Automation](#automation)).
 - [ ] **W4: LLM weekly brief.** TODO: a short weekly brief written with the Claude API from the mart tables
   (check the current model IDs and structured-output options before building). Guardrail: every number in the
   brief must exist in the input tables; the brief is returned as structured output with the numbers it cites,

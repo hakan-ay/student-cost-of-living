@@ -1,0 +1,61 @@
+name: Weekly refresh
+
+# Fetches the latest data, rebuilds and tests the marts, and commits the refreshed files back to main.
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.2.0
+      - run: uv sync --locked
+
+      # One unreachable source must not block the others: the fetch result is checked at the end of the job,
+      # and dbt source freshness turns a source that keeps failing into an error after 15 days.
+      - name: Fetch ECB, Eurostat and Istat
+        id: fetch
+        continue-on-error: true
+        run: uv run python src/fetch_all.py
+
+      - name: dbt build (seeds, models, tests)
+        working-directory: dbt
+        run: uv run dbt build
+
+      - name: dbt source freshness
+        working-directory: dbt
+        run: uv run dbt source freshness
+
+      - name: Export marts and update README
+        run: |
+          uv run python src/export_marts.py
+          uv run python src/update_readme.py
+          sed -n '/latest-numbers:start/,/latest-numbers:end/p' README.md | grep -v 'latest-numbers' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add data/raw data/marts README.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Data refresh $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Fail if a source could not be fetched
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "::error::At least one source failed to fetch; see the 'Fetch ECB, Eurostat and Istat' step."
+          exit 1

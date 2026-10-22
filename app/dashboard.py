@@ -104,6 +104,24 @@ def line_chart(df: pd.DataFrame, x: str, series: list[tuple[str, str, str]], y_t
     return fig
 
 
+def bar_chart(labels: list[str], values: list[float], color: str, value_fmt: str = "€{:,.0f}") -> go.Figure:
+    """One series of horizontal bars: <= 24px thick, 4px rounded data-end, the value at the tip, no legend."""
+    fig = go.Figure(go.Bar(
+        x=values, y=labels, orientation="h", marker=dict(color=color), width=0.5,
+        text=[value_fmt.format(v) for v in values], textposition="outside", cliponaxis=False,
+        textfont=dict(color=C["ink"], size=12), hovertemplate="%{y}: %{x:,.0f}<extra></extra>",
+    ))
+    fig.update_layout(
+        height=56 * len(labels) + 24, margin=dict(l=8, r=64, t=8, b=8), barcornerradius=4,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", showlegend=False,
+        font=dict(family=FONT, color=C["ink2"], size=12),
+        hoverlabel=dict(bgcolor=C["surface"], font_color=C["ink"], bordercolor=C["axis"]),
+    )
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(autorange="reversed", tickfont_color=C["ink2"], showgrid=False, linecolor=C["axis"])
+    return fig
+
+
 def chart_with_table(title: str, fig: go.Figure, table: pd.DataFrame) -> None:
     # The title is page text, not part of the figure, so it never collides with a wrapped legend on a phone.
     st.markdown(f"**{title}**")
@@ -220,6 +238,29 @@ with right:
         f[["rate_date", "eur_try", "change_1d_pct", "change_30d_pct", "change_365d_pct"]],
     )
     st.caption("ECB euro reference rate for the Turkish lira, published on ECB business days.")
+
+left, right = st.columns(2)
+with left:
+    components = basket["component"].tolist()
+    chart_with_table(
+        f"Where the money goes, {cur['month']:%B %Y}",
+        bar_chart([c.capitalize() for c in components], [cur[c] for c in components], C["eur"]),
+        pd.DataFrame({"component": components, "eur": [round(cur[c], 2) for c in components],
+                      "share": [f"{cur[c] / cur['total_eur']:.1%}" for c in components]}),
+    )
+    st.caption("Monthly budget in EUR by component. A component at zero (free local transport for students "
+               "under 26) has no bar.")
+with right:
+    real = b.assign(**{"Budget in 2025 lira": b["budget_try_at_2025_prices"]})
+    chart_with_table(
+        "Budget in 2025 lira",
+        line_chart(real, "month", [("Budget in 2025 lira", "Budget in 2025 lira", C["try"])], "TRY at 2025 prices",
+                   ",.0f"),
+        real[["month", "total_try", "budget_try_at_2025_prices", "budget_real_try_yoy_pct"]]
+        .round({"total_try": 0, "budget_try_at_2025_prices": 0, "budget_real_try_yoy_pct": 2}),
+    )
+    st.caption("The TRY budget deflated by Turkish consumer prices: what the month costs a family whose income keeps "
+               "up with Turkish inflation. A falling line means Italy got cheaper for them in real terms.")
 
 # ---------- latest weekly brief ----------
 st.divider()

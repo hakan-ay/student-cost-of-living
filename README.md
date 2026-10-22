@@ -223,7 +223,8 @@ briefs. It needs no database, network access or API key, so it runs anywhere the
 - **Budget growth, EUR vs TRY**, both indexed to 100 at the start of the period so they share one axis (no
   dual axes); the gap between the lines is the exchange-rate effect.
 - **Inflation, Italy vs Turkey** (HICP annual rates), **Italian rents vs all prices** (HICP CP041 vs all items,
-  2025 = 100) and **EUR/TRY daily**.
+  2025 = 100), **EUR/TRY daily**, **where the money goes** (the latest month by component) and the **budget in
+  2025 lira** (deflated by Turkish prices).
 - **Latest weekly brief** with links to the fact sheet and structured brief it was checked against, and a table
   of every number in it with the fact it comes from.
 
@@ -282,7 +283,7 @@ dbt/
 - [x] **W4: LLM weekly brief.** Weekly brief written by a Claude Code routine and published through a numeric
   guardrail (see [Weekly brief](#weekly-brief)).
 - [x] **W5: dashboard.** Streamlit app on the marts and the weekly briefs (see [Dashboard](#dashboard)).
-- [ ] **Next:** publish the live demo on Streamlit Community Cloud; a component breakdown of the budget.
+- [ ] **Next:** publish the live demo on Streamlit Community Cloud.
 
 ## Limitations
 

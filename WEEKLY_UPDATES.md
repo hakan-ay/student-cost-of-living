@@ -12,7 +12,23 @@ exact fact sheet and the structured brief it was checked against. Descriptive on
 
 | Week of | Headline |
 |---|---|
+| [2026-10-26](#2026-10-26) | Euro steady near 55.7 lira; a month in Italy costs 854 euros |
 | [2026-10-22](#2026-10-22) | A month in Italy: 854 euros, or 47,834 lira |
+
+---
+
+<a id="2026-10-26"></a>
+## 2026-10-26: Euro steady near 55.7 lira; a month in Italy costs 854 euros
+
+*Consumer prices up to September 2026, exchange rate up to 23 October 2026.*
+
+Italian price data still end in September 2026, so the budget is the same as last week. A month as a student in Turin costs 854 euros, 2.9 % more than a year earlier, with rent at 468 euros and food at 281 euros. At September's average of 56.01 lira per euro that comes to 47,834 lira, up 18.9 % over a year.
+
+The latest ECB rate, for 23 October 2026, was 55.67 lira per euro, against 55.73 a week before. That is a dip of 0.1 % over the week and 0.1 % over 30 days, while over 365 days the euro is up 14.1 %. At the latest rate, 1,000 lira buys 17.96 euros.
+
+Turkish consumer prices rose 29.7 % over a year, faster than the euro. Measured in 2025 lira, the budget fell 8.4 %, from 38,035 to 34,854. The real EUR/TRY index is 95.6, below its 2025 level of 100.
+
+<sub>29 numbers checked against the fact sheet: [`2026-10-26.facts.json`](reports/briefs/2026-10-26.facts.json) · structured brief: [`2026-10-26.brief.json`](reports/briefs/2026-10-26.brief.json)</sub>
 
 ---
 

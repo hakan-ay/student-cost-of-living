@@ -25,7 +25,7 @@
 ## Latest numbers
 
 <!-- latest-numbers:start -->
-Generated from the marts: consumer prices up to September 2026, exchange rate up to 2 November 2026.
+Generated from the marts: consumer prices up to September 2026, exchange rate up to 6 November 2026.
 
 | | Sep 2025 | Sep 2026 | Change |
 |---|---:|---:|---:|

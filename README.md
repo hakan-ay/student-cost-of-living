@@ -25,16 +25,16 @@
 ## Latest numbers
 
 <!-- latest-numbers:start -->
-Generated from the marts: consumer prices up to September 2026, exchange rate up to 16 November 2026.
+Generated from the marts: consumer prices up to October 2026, exchange rate up to 20 November 2026.
 
-| | Sep 2025 | Sep 2026 | Change |
+| | Oct 2025 | Oct 2026 | Change |
 |---|---:|---:|---:|
-| Monthly budget in EUR | 830 | 854 | +2.9 % |
-| Average EUR/TRY | 48.5 | 56.0 | +15.5 % |
-| Monthly budget in TRY | 40,237 | 47,834 | +18.9 % |
-| Budget in TRY at 2025 Turkish prices | 38,035 | 34,854 | −8.4 % |
+| Monthly budget in EUR | 831 | 860 | +3.5 % |
+| Average EUR/TRY | 48.7 | 55.4 | +13.8 % |
+| Monthly budget in TRY | 40,463 | 47,663 | +17.8 % |
+| Budget in TRY at 2025 Turkish prices | 37,290 | 33,859 | −9.2 % |
 
-In nominal lira the budget changed by +18.9 % in a year. Turkish prices rose faster than the euro did (Turkish HICP +29.7 % against EUR/TRY +15.5 %), so for a household whose income keeps up with Turkish inflation the same month in Italy became about 8 % cheaper in real terms.
+In nominal lira the budget changed by +17.8 % in a year. Turkish prices rose faster than the euro did (Turkish HICP +29.7 % against EUR/TRY +13.8 %), so for a household whose income keeps up with Turkish inflation the same month in Italy became about 9 % cheaper in real terms.
 <!-- latest-numbers:end -->
 
 ## Sources

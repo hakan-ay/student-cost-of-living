@@ -12,11 +12,27 @@ exact fact sheet and the structured brief it was checked against. Descriptive on
 
 | Week of | Headline |
 |---|---|
+| [2026-11-23](#2026-11-23) | New October prices put a student month in Italy at 860 euros |
 | [2026-11-16](#2026-11-16) | Euro eases to 55.67 lira; Italian student month stays 854 euros |
 | [2026-11-09](#2026-11-09) | Euro reaches 56 lira; a month in Italy still 854 euros |
 | [2026-11-02](#2026-11-02) | Euro edges up to 55.8 lira; a month in Italy: 854 euros |
 | [2026-10-26](#2026-10-26) | Euro steady near 55.7 lira; a month in Italy costs 854 euros |
 | [2026-10-22](#2026-10-22) | A month in Italy: 854 euros, or 47,834 lira |
+
+---
+
+<a id="2026-11-23"></a>
+## 2026-11-23: New October prices put a student month in Italy at 860 euros
+
+*Consumer prices up to October 2026, exchange rate up to 20 November 2026.*
+
+October 2026 prices are now in. A student month in Italy costs 860 euros, 3.5 % more than in October 2025: 470 euros of rent, 284 of food and 106 of other spending, with local transport free for students under 26 in Piedmont. At October's average rate of 55.42 lira per euro, that is 47,663 lira, a rise of 17.8 % over a year.
+
+The exchange rate barely moved this week. The ECB reference rate was 55.58 lira per euro on 20 November 2026, down 0.16 % from 55.67 a week earlier. It is down 0.26 % over 30 days and up 13.9 % over 365 days. At the latest rate, 1,000 lira buys 17.99 euros.
+
+Italian consumer prices rose 5.6 % over a year and Turkish ones 29.7 %. Adjusted for Turkish inflation, the budget is 33,859 lira in 2025 prices, against 37,290 a year earlier, a fall of 9.2 %. The real EUR/TRY index is 93.4, below its 2025 base of 100: relative to prices in both countries, Italy is cheaper for lira earners than in 2025.
+
+<sub>33 numbers checked against the fact sheet: [`2026-11-23.facts.json`](reports/briefs/2026-11-23.facts.json) · structured brief: [`2026-11-23.brief.json`](reports/briefs/2026-11-23.brief.json)</sub>
 
 ---
 
